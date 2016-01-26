@@ -75,8 +75,8 @@ headOr ::
   a
   -> List a
   -> a
-headOr =
-  error "todo: Course.List#headOr"
+headOr a Nil      = a
+headOr _ (h :. _) = h
 
 -- | The product of the elements of a list.
 --
@@ -88,8 +88,7 @@ headOr =
 product ::
   List Int
   -> Int
-product =
-  error "todo: Course.List#product"
+product = foldRight (*) 1
 
 -- | Sum the elements of the list.
 --
@@ -103,8 +102,8 @@ product =
 sum ::
   List Int
   -> Int
-sum =
-  error "todo: Course.List#sum"
+sum = foldRight (+) 0
+
 
 -- | Return the length of the list.
 --
@@ -115,8 +114,7 @@ sum =
 length ::
   List a
   -> Int
-length =
-  error "todo: Course.List#length"
+length = foldRight (\_ acc -> acc + 1) 0
 
 -- | Map the given function on each element of the list.
 --
@@ -130,8 +128,8 @@ map ::
   (a -> b)
   -> List a
   -> List b
-map =
-  error "todo: Course.List#map"
+map _ Nil      = Nil
+map f (h :. t) = (f h) :. (map f t)
 
 -- | Return elements satisfying the given predicate.
 --
@@ -147,8 +145,11 @@ filter ::
   (a -> Bool)
   -> List a
   -> List a
-filter =
-  error "todo: Course.List#filter"
+filter _ Nil      = Nil
+filter p (h :. t) = let t' = filter p t in
+  if p h then
+    h :. t'
+    else t'
 
 -- | Append two lists to a new list.
 --
@@ -166,8 +167,7 @@ filter =
   List a
   -> List a
   -> List a
-(++) =
-  error "todo: Course.List#(++)"
+(++) = error "todo append"
 
 infixr 5 ++
 
@@ -216,7 +216,7 @@ flattenAgain =
 
 -- | Convert a list of optional values to an optional list of values.
 --
--- * If the list contains all `Full` values, 
+-- * If the list contains all `Full` values,
 -- then return `Full` list of values.
 --
 -- * If the list contains one or more `Empty` values,
