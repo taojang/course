@@ -347,8 +347,8 @@ replicateA ::
   Int
   -> f a
   -> f (List a)
-replicateA i = --(<$>) (\a -> replicate i a)
-  error "todo: Course.Applicative#replicateA"
+replicateA n = sequence . replicate n
+
 
 -- | Filter a list with a predicate that produces an effect.
 --
@@ -375,8 +375,13 @@ filtering ::
   (a -> f Bool)
   -> List a
   -> f (List a)
-filtering =
-  error "todo: Course.Applicative#filtering"
+-- TODO: rewrite using foldRight
+filtering p =
+  (<$>) flatten . sequence . map (\x ->
+                                   (\y -> if y then
+                                            x :. Nil
+                                          else Nil) <$> (p x))
+--  error "todo: Course.Applicative#filtering"
 
 -----------------------
 -- SUPPORT LIBRARIES --
