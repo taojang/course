@@ -121,7 +121,7 @@ instance Monad ((->) t) where
     (a -> ((->) t b))
     -> ((->) t a)
     -> ((->) t b)
-  (=<<) f g t' = (f . g) t' t'
+  f =<< g  = \ t' -> (f . g) t' t'
 --    error "todo: Course.Monad (=<<)#instance ((->) t)"
 
 -- | Flattens a combined structure to a single structure.
@@ -141,8 +141,8 @@ join ::
   Monad f =>
   f (f a)
   -> f a
-join =
-  error "todo: Course.Monad#join"
+join = (=<<) id
+--  error "todo: Course.Monad#join"
 
 -- | Implement a flipped version of @(=<<)@, however, use only
 -- @join@ and @(<$>)@.
@@ -155,8 +155,8 @@ join =
   f a
   -> (a -> f b)
   -> f b
-(>>=) =
-  error "todo: Course.Monad#(>>=)"
+fa >>= g = join $ g <$> fa
+--  error "todo: Course.Monad#(>>=)"
 
 infixl 1 >>=
 
@@ -171,8 +171,8 @@ infixl 1 >>=
   -> (a -> f b)
   -> a
   -> f c
-(<=<) =
-  error "todo: Course.Monad#(<=<)"
+g <=< h = (g =<<) . h
+--  error "todo: Course.Monad#(<=<)"
 
 infixr 1 <=<
 
