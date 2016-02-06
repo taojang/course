@@ -143,6 +143,7 @@ put s = State (\ _ -> ((), s))
 --
 -- >>> let p x = (\s -> (const $ pure (x == 'i')) =<< put (1+s)) =<< get in runState (findM p $ listh ['a'..'h']) 0
 -- (Empty,8)
+-- TODO: find out why foldRight version will not work
 findM ::
   Monad f =>
   (a -> f Bool)
@@ -172,6 +173,7 @@ findM p (h :. t)  =
 --
 -- prop> case firstRepeat xs of Empty -> let xs' = hlist xs in nub xs' == xs'; Full x -> length (filter (== x) xs) > 1
 -- prop> case firstRepeat xs of Empty -> True; Full x -> let (l, (rx :. rs)) = span (/= x) xs in let (l2, r2) = span (/= x) rs in let l3 = hlist (l ++ (rx :. Nil) ++ l2) in nub l3 == l3
+-- TODO: reduce code dup, discover common pattern in `distinct`
 firstRepeat ::
   Ord a =>
   List a
@@ -215,6 +217,7 @@ distinct xs = fst (runState (filtering predicate xs) S.empty)
 --
 -- >>> isHappy 44
 -- True
+-- TODO: use firstRepeat
 isHappy ::
   Integer
   -> Bool
