@@ -719,10 +719,10 @@ instance Applicative MaybeListZipper where
 -- [[1] >2< [3,4,5],[] >1< [2,3,4,5]] >[2,1] >3< [4,5]< [[3,2,1] >4< [5],[4,3,2,1] >5< []]
 instance Extend ListZipper where
   f <<= lz =
-    let l = unfoldr (((\ x -> (f x, lz) ) <$>) . toOptional . (moveLeftN 1)) lz
-        r = unfoldr (((\ x -> (f x, lz) ) <$>) . toOptional . (moveRightN 1)) lz
+    let l = unfoldr (((\ x -> (f x, x) ) <$>) . toOptional . (moveLeftN 1)) lz
+        r = unfoldr (((\ x -> (f x, x) ) <$>) . toOptional . (moveRightN 1)) lz
     in ListZipper l (f lz) r
-    --error "todo: Course.ListZipper (<<=)#instance ListZipper"
+    -- error "todo: Course.ListZipper (<<=)#instance ListZipper"
 
 -- | Implement the `Extend` instance for `MaybeListZipper`.
 -- This instance will use the `Extend` instance for `ListZipper`.
