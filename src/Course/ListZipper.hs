@@ -484,16 +484,16 @@ moveLeftN' ::
   -> ListZipper a
   -> Either Int (ListZipper a)
 moveLeftN' n lz =
-  let go n' acc
-        | n' == 0   = Right lz
-        | n' < 0    = moveRightN' (-n) lz
+  let go n' init
+        | n' == 0 && init = Right lz
+        | n' < 0  = moveRightN' (-n) lz
         | otherwise = case moveLeftN n' lz of
-           IsNotZ -> go (n' - 1) (acc + 1)
-           IsZ l  -> if acc == 0 then
+           IsNotZ -> go (n' - 1) False
+           IsZ l  -> if init then
                        Right l
                      else
                        Left n'
-  in go n 0
+  in go n True
   -- error "todo: Course.ListZipper#moveLeftN'"
 
 -- | Move the focus right the given number of positions. If the value is negative, move left instead.
