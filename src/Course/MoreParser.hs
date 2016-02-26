@@ -39,7 +39,8 @@ P p <.> i =
 spaces ::
   Parser Chars
 spaces =
-  error "todo: Course.MoreParser#spaces"
+  list space
+  -- error "todo: Course.MoreParser#spaces"
 
 -- | Write a function that applies the given parser, then parses 0 or more spaces,
 -- then produces the result of the original parser.
@@ -54,8 +55,11 @@ spaces =
 tok ::
   Parser a
   -> Parser a
-tok =
-  error "todo: Course.MoreParser#tok"
+tok p = do
+  r <- p
+  _ <- spaces
+  return r
+  -- error "todo: Course.MoreParser#tok"
 
 -- | Write a function that parses the given char followed by 0 or more spaces.
 --
@@ -64,13 +68,14 @@ tok =
 --
 -- >>> isErrorResult (parse (charTok 'a') "dabc")
 -- True
--- 
+--
 -- /Tip:/ Use `tok` and `is`.
 charTok ::
   Char
   -> Parser Char
-charTok =
-  error "todo: Course.MoreParser#charTok"
+charTok c =
+  tok $ is c
+  -- error "todo: Course.MoreParser#charTok"
 
 -- | Write a parser that parses a comma ',' followed by 0 or more spaces.
 --
@@ -79,12 +84,13 @@ charTok =
 --
 -- >>> isErrorResult( parse commaTok "1,23")
 -- True
--- 
+--
 -- /Tip:/ Use `charTok`.
 commaTok ::
   Parser Char
 commaTok =
-  error "todo: Course.MoreParser#commaTok"
+  charTok ','
+  -- error "todo: Course.MoreParser#commaTok"
 
 -- | Write a parser that parses either a double-quote or a single-quote.
 --
@@ -101,7 +107,8 @@ commaTok =
 quote ::
   Parser Char
 quote =
-  error "todo: Course.MoreParser#quote"
+  tok (is '"' ||| is '\'')
+  -- error "todo: Course.MoreParser#quote"
 
 -- | Write a function that parses the given string (fails otherwise).
 --
@@ -115,8 +122,9 @@ quote =
 string ::
   Chars
   -> Parser Chars
-string =
-  error "todo: Course.MoreParser#is"
+string str =
+  traverse id (is <$> str)
+  -- error "todo: Course.MoreParser#is"
 
 -- | Write a function that parsers the given string, followed by 0 or more spaces.
 --
@@ -130,8 +138,9 @@ string =
 stringTok ::
   Chars
   -> Parser Chars
-stringTok =
-  error "todo: Course.MoreParser#stringTok"
+stringTok str =
+  tok $ string str
+  -- error "todo: Course.MoreParser#stringTok"
 
 -- | Write a function that tries the given parser, otherwise succeeds by producing the given value.
 --
@@ -146,8 +155,9 @@ option ::
   a
   -> Parser a
   -> Parser a
-option =
-  error "todo: Course.MoreParser#option"
+option x p =
+  p ||| valueParser x
+  -- error "todo: Course.MoreParser#option"
 
 -- | Write a parser that parses 1 or more digits.
 --
@@ -161,7 +171,8 @@ option =
 digits1 ::
   Parser Chars
 digits1 =
-  error "todo: Course.MoreParser#digits1"
+  list1 digit
+  -- error "todo: Course.MoreParser#digits1"
 
 -- | Write a function that parses one of the characters in the given string.
 --
@@ -175,8 +186,9 @@ digits1 =
 oneof ::
   Chars
   -> Parser Char
-oneof =
-  error "todo: Course.MoreParser#oneof"
+oneof str =
+  satisfy (`elem` str)
+  -- error "todo: Course.MoreParser#oneof"
 
 -- | Write a function that parses any character, but fails if it is in the given string.
 --
@@ -190,8 +202,9 @@ oneof =
 noneof ::
   Chars
   -> Parser Char
-noneof =
-  error "todo: Course.MoreParser#noneof"
+noneof str =
+  satisfy (`notElem` str)
+  -- error "todo: Course.MoreParser#noneof"
 
 -- | Write a function that applies the first parser, runs the third parser keeping the result,
 -- then runs the second parser and produces the obtained result.
@@ -214,8 +227,12 @@ between ::
   -> Parser c
   -> Parser a
   -> Parser a
-between =
-  error "todo: Course.MoreParser#between"
+between o c a = do
+  _ <- o
+  r <- a
+  _ <- c
+  return r
+  -- error "todo: Course.MoreParser#between"
 
 -- | Write a function that applies the given parser in between the two given characters.
 --
@@ -237,8 +254,9 @@ betweenCharTok ::
   -> Char
   -> Parser a
   -> Parser a
-betweenCharTok =
-  error "todo: Course.MoreParser#betweenCharTok"
+betweenCharTok o c a =
+  between (charTok o) (charTok c) a
+  -- error "todo: Course.MoreParser#betweenCharTok"
 
 -- | Write a function that parses 4 hex digits and return the character value.
 --
@@ -258,7 +276,12 @@ betweenCharTok =
 hex ::
   Parser Char
 hex =
-  error "todo: Course.MoreParser#hex"
+  (\str -> case readHex str of
+      Full res -> chr res
+      Empty    -> chr 0)
+  <$>
+  (replicateA 4 $ satisfy isHexDigit)
+  -- error "todo: Course.MoreParser#hex"
 
 -- | Write a function that parses the character 'u' followed by 4 hex digits and return the character value.
 --
@@ -281,7 +304,8 @@ hex =
 hexu ::
   Parser Char
 hexu =
-  error "todo: Course.MoreParser#hexu"
+  is 'u' >>> hex
+  -- error "todo: Course.MoreParser#hexu"
 
 -- | Write a function that produces a non-empty list of values coming off the given parser (which must succeed at least once),
 -- separated by the second given parser.
@@ -303,8 +327,16 @@ sepby1 ::
   Parser a
   -> Parser s
   -> Parser (List a)
-sepby1 =
-  error "todo: Course.MoreParser#sepby1"
+sepby1 p1 p2 =
+  let p' = do
+        _ <- p2
+        r <- p1
+        return r
+  in do
+    h <- p1
+    t <- list p'
+    return (h :. t)
+  -- error "todo: Course.MoreParser#sepby1"
 
 -- | Write a function that produces a list of values coming off the given parser,
 -- separated by the second given parser.
@@ -326,8 +358,9 @@ sepby ::
   Parser a
   -> Parser s
   -> Parser (List a)
-sepby =
-  error "todo: Course.MoreParser#sepby"
+sepby pa ps =
+  sepby1 pa ps ||| valueParser Nil
+  -- error "todo: Course.MoreParser#sepby"
 
 -- | Write a parser that asserts that there is no remaining input.
 --
@@ -339,7 +372,11 @@ sepby =
 eof ::
   Parser ()
 eof =
-  error "todo: Course.MoreParser#eof"
+  P (\i ->
+     case i of
+       Nil -> Result Nil ()
+       _   -> ErrorResult UnexpectedEof)
+  -- error "todo: Course.MoreParser#eof"
 
 -- | Write a parser that produces a character that satisfies all of the given predicates.
 --
@@ -362,8 +399,9 @@ eof =
 satisfyAll ::
   List (Char -> Bool)
   -> Parser Char
-satisfyAll =
-  error "todo: Course.MoreParser#satisfyAll"
+satisfyAll ps =
+  satisfy (and <$> sequence ps)
+  -- error "todo: Course.MoreParser#satisfyAll"
 
 -- | Write a parser that produces a character that satisfies any of the given predicates.
 --
@@ -383,8 +421,9 @@ satisfyAll =
 satisfyAny ::
   List (Char -> Bool)
   -> Parser Char
-satisfyAny =
-  error "todo: Course.MoreParser#satisfyAny"
+satisfyAny ps =
+  satisfy (or <$> sequence ps)
+  -- error "todo: Course.MoreParser#satisfyAny"
 
 -- | Write a parser that parses between the two given characters, separated by a comma character ','.
 --
@@ -412,5 +451,6 @@ betweenSepbyComma ::
   -> Char
   -> Parser a
   -> Parser (List a)
-betweenSepbyComma =
-  error "todo: Course.MoreParser#betweenSepbyComma"
+betweenSepbyComma o c p =
+  betweenCharTok o c (sepby p (charTok ','))
+  -- error "todo: Course.MoreParser#betweenSepbyComma"
