@@ -83,7 +83,11 @@ data Op =
 convertInteractive ::
   IO ()
 convertInteractive =
-  error "todo: Course.Interactive#convertInteractive"
+  putStrLn "Please enter a string, it will be upper-cased:" >-
+    getLine >>=
+      (\ l ->
+        putStrLn $ toUpper <$> l)
+  -- error "todo: Course.Interactive#convertInteractive"
 
 -- |
 --
@@ -111,7 +115,12 @@ convertInteractive =
 reverseInteractive ::
   IO ()
 reverseInteractive =
-  error "todo: Course.Interactive#reverseInteractive"
+  putStrLn "Please enter a filepath, whose content will be reversed:" >-
+  getLine >>=
+    (\ filepath ->
+      readFile filepath >>= (\ xs -> writeFile filepath $ reverse xs))
+
+  -- error "todo: Course.Interactive#reverseInteractive"
 
 -- |
 --
@@ -137,7 +146,18 @@ reverseInteractive =
 encodeInteractive ::
   IO ()
 encodeInteractive =
-  error "todo: Course.Interactive#encodeInteractive"
+  putStrLn "Please enter a string for url-encoding:" >-
+  getLine >>=
+    (\ xs ->
+      putStrLn $ xs >>= urlEncode)
+  where
+    urlEncode :: Char -> List Char
+    urlEncode c
+            | c == ' '  = "%20"
+            | c == '\t' = "%09"
+            | c == '\"' = "%22"
+            | otherwise = c :. Nil
+  -- error "todo: Course.Interactive#encodeInteractive"
 
 interactive ::
   IO ()
