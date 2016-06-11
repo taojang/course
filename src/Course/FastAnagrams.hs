@@ -14,8 +14,11 @@ fastAnagrams ::
   Chars
   -> Filename
   -> IO (List Chars)
-fastAnagrams =
-  error "todo: Course.FastAnagrams#fastAnagrams"
+fastAnagrams str filename =
+  filter (((==) `on` NoCaseString) str). lines
+  <$> readFile filename
+
+  -- error "todo: Course.FastAnagrams#fastAnagrams"
 
 newtype NoCaseString =
   NoCaseString {
